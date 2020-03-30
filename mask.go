@@ -1,6 +1,6 @@
 // Some of codes from  https://play.golang.org/p/UjkjLDt3vT
 // nurul.apriyani
-package mask
+package logger
 
 import (
 	"reflect"
@@ -16,12 +16,12 @@ func MaskString(sval string) (string){
 	return sval
 }
 
-// Mask for masking value
+// Mask for the mask field
 func MaskField(obj reflect.Value, i int) (string){
 	f := obj.Field(i)
-	if reflect.TypeOf(f.Interface()).Kind() == reflect.String && strings.ToLower(obj.Type().Field(i).Tag.Get("mask")) == "true"{
+	if reflect.TypeOf(f.Interface()).Kind() == reflect.String {
 		sval := f.Interface().(string)
-		if len(sval) > 0 {
+		if strings.ToLower(obj.Type().Field(i).Tag.Get("mask")) == "true" && len(sval) > 0 {
 			sval = doMaskValue(sval)
 		}
 		return sval
@@ -45,6 +45,9 @@ func asterixString(sum int) string {
 
 // Mask for mask struct
 func Mask(msg interface{}) {
+	if msg == nil {
+		return
+	}
 	rv := reflect.ValueOf(msg)
 	changerv(rv)
 }
@@ -75,9 +78,6 @@ func changerv(rv reflect.Value) (reflect.Value){
 func changeMap(rv reflect.Value) {
 	for _, e := range rv.MapKeys() {
 		val := rv.MapIndex(e).Elem()
-		if !val.IsValid() {
-			return
-		}
 		vp := reflect.New(val.Type())
 		vp.Elem().Set(val)
 		vp.Interface()
