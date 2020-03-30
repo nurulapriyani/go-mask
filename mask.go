@@ -45,6 +45,9 @@ func asterixString(sum int) string {
 
 // Mask for mask struct
 func Mask(msg interface{}) {
+	if msg == nil {
+		return
+	}
 	rv := reflect.ValueOf(msg)
 	changerv(rv)
 }
