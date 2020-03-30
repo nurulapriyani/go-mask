@@ -17,7 +17,7 @@ func MaskString(sval string) (string){
 }
 
 // Mask for masking value
-func MaskField(obj reflect.Value, i int) (interface{}){
+func MaskField(obj reflect.Value, i int) (string){
 	f := obj.Field(i)
 	if reflect.TypeOf(f.Interface()).Kind() == reflect.String && strings.ToLower(obj.Type().Field(i).Tag.Get("mask")) == "true"{
 		sval := f.Interface().(string)
@@ -26,7 +26,7 @@ func MaskField(obj reflect.Value, i int) (interface{}){
 		}
 		return sval
 	}
-	return obj
+	return ""
 }
 
 func doMaskValue(val string) string{
