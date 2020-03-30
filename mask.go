@@ -50,19 +50,15 @@ func Mask(msg interface{}) {
 }
 
 func changerv(rv reflect.Value) (reflect.Value){
-	if rv.Kind() == reflect.Ptr {
+	if rv.Kind() == reflect.Ptr || rv.Kind() == reflect.Interface {
 		rv = rv.Elem()
+		changerv(rv)
 	}
 
 	if rv.Kind() == reflect.Map {
 		changeMap(rv)
 	}
-
-	if rv.Kind() == reflect.Interface {
-		rv = rv.Elem()
-		changerv(rv)
-	}
-
+	
 	if rv.Kind() == reflect.Struct {
 		changeStruct(rv)
 	}
