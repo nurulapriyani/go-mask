@@ -1,6 +1,6 @@
 // Some of codes from  https://play.golang.org/p/UjkjLDt3vT
 // nurul.apriyani
-package logger
+package mask
 
 import (
 	"reflect"
