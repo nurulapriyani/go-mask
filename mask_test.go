@@ -19,7 +19,7 @@ func TestMask(t *testing.T) {
 	empName := "test*****"
 	empPhone := "1234*****"
 
-	Mask(emp)
+	Mask(&emp)
 
 	if emp.Name != empName {
 		t.Errorf("Expected: %v , got: %v", empName, emp.Name)
@@ -53,13 +53,13 @@ func TestMaskField(t *testing.T) {
 	object1 := reflect.ValueOf(emp)
 	got := MaskField(object1, 0)
 
-	if got.(string) != empName {
-		t.Errorf("Expected: %v , got: %v", empName, got.(string))
+	if got != empName {
+		t.Errorf("Expected: %v , got: %v", empName, got)
 	}
 
 	got = MaskField(object1, 1)
-	if got.(string) != empPhone {
-		t.Errorf("Expected: %v , got: %v", empPhone, got.(string))
+	if got != empPhone {
+		t.Errorf("Expected: %v , got: %v", empPhone, got)
 	}
 
 }
