@@ -45,9 +45,6 @@ func asterixString(sum int) string {
 
 // Mask for mask struct
 func Mask(msg interface{}) {
-	if msg == nil {
-		return
-	}
 	rv := reflect.ValueOf(msg)
 	changerv(rv)
 }
@@ -78,6 +75,9 @@ func changerv(rv reflect.Value) (reflect.Value){
 func changeMap(rv reflect.Value) {
 	for _, e := range rv.MapKeys() {
 		val := rv.MapIndex(e).Elem()
+		if !val.IsValid() {
+			return
+		}
 		vp := reflect.New(val.Type())
 		vp.Elem().Set(val)
 		vp.Interface()
