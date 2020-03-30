@@ -92,7 +92,7 @@ func changeStruct(rv reflect.Value) {
 		switch field.Kind() {
 		case reflect.String:
 			if strings.ToLower(rv.Type().Field(i).Tag.Get("mask")) == "true" {
-				field.SetString(MaskField(rv, i).(string))
+				field.SetString(MaskField(rv, i))
 			}
 		case reflect.Struct, reflect.Ptr, reflect.Interface:
 			changerv(field)
