@@ -1,4 +1,4 @@
-package logger
+package mask
 
 import (
 	"crypto/aes"
