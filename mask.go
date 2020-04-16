@@ -6,6 +6,7 @@ import (
 	"crypto/aes"
 	"crypto/cipher"
 	"encoding/hex"
+	"crypto/rand"
 	"fmt"
 	"math"
 	"reflect"
@@ -50,11 +51,8 @@ func MaskField(obj reflect.Value, i int, typ string, secretKey string, snonce st
 				panic(err.Error())
 			}
 			
-			nonce := make([]byte, gcm.NonceSize())
+			nonce := make([]byte, aesgcm.NonceSize())
 			if _, err = io.ReadFull(rand.Reader, nonce); err != nil {
-				logger.ErrorWithData(ctx, logger.Data{
-					KeyOperationID: AesGCMEncryptOperation,
-				}, err)
 				return ""
 			}
 
