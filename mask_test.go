@@ -118,8 +118,7 @@ func TestMaskFieldAESGCM(t *testing.T) {
 func decrypt(encText string) string {
 	key, _ := hex.DecodeString("6368616e676520746869732070617373776f726420746f206120736563726574")
 	ciphertext, _ := hex.DecodeString(encText)
-	nonce, _ := hex.DecodeString("64a9433eae7ccceee2fc0eda")
-
+	
 	block, err := aes.NewCipher(key)
 	if err != nil {
 		panic(err.Error())
@@ -130,6 +129,12 @@ func decrypt(encText string) string {
 		panic(err.Error())
 	}
 
+	nonceSize := aesgcm.NonceSize()
+	if len(ciphertext) < nonceSize {
+		return ""
+	}
+	nonce, ciphertext := ciphertext[:nonceSize], ciphertext[nonceSize:]
+	
 	plaintext, err := aesgcm.Open(nil, nonce, ciphertext, nil)
 	if err != nil {
 		panic(err.Error())
