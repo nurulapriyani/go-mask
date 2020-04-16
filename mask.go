@@ -49,8 +49,16 @@ func MaskField(obj reflect.Value, i int, typ string, secretKey string, snonce st
 			if err != nil {
 				panic(err.Error())
 			}
+			
+			nonce := make([]byte, gcm.NonceSize())
+			if _, err = io.ReadFull(rand.Reader, nonce); err != nil {
+				logger.ErrorWithData(ctx, logger.Data{
+					KeyOperationID: AesGCMEncryptOperation,
+				}, err)
+				return ""
+			}
 
-			ciphertext := aesgcm.Seal(nil, nonce, plaintext, nil)
+			ciphertext := aesgcm.Seal(nonce, nonce, plaintext, nil)
 			sval = fmt.Sprintf("%x", ciphertext)
 		} else if strings.ToLower(obj.Type().Field(i).Tag.Get("mask")) == "true" && len(sval) > 0 {
 			sval = doMaskValue(sval)
