@@ -6,10 +6,12 @@ import (
 	"crypto/aes"
 	"crypto/cipher"
 	"encoding/hex"
+	"crypto/rand"
 	"fmt"
 	"math"
 	"reflect"
 	"strings"
+	"io"
 )
 
 const (
@@ -43,14 +45,17 @@ func MaskField(obj reflect.Value, i int, typ string, secretKey string, snonce st
 				panic(err.Error())
 			}
 
-			nonce, _ := hex.DecodeString(snonce)
-
 			aesgcm, err := cipher.NewGCM(block)
 			if err != nil {
 				panic(err.Error())
 			}
+			
+			nonce := make([]byte, aesgcm.NonceSize())
+			if _, err = io.ReadFull(rand.Reader, nonce); err != nil {
+				return ""
+			}
 
-			ciphertext := aesgcm.Seal(nil, nonce, plaintext, nil)
+			ciphertext := aesgcm.Seal(nonce, nonce, plaintext, nil)
 			sval = fmt.Sprintf("%x", ciphertext)
 		} else if strings.ToLower(obj.Type().Field(i).Tag.Get("mask")) == "true" && len(sval) > 0 {
 			sval = doMaskValue(sval)
