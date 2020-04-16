@@ -11,6 +11,7 @@ import (
 	"math"
 	"reflect"
 	"strings"
+	"io"
 )
 
 const (
@@ -43,8 +44,6 @@ func MaskField(obj reflect.Value, i int, typ string, secretKey string, snonce st
 			if err != nil {
 				panic(err.Error())
 			}
-
-			nonce, _ := hex.DecodeString(snonce)
 
 			aesgcm, err := cipher.NewGCM(block)
 			if err != nil {
