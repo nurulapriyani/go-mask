@@ -31,7 +31,7 @@ func MaskString(sval string) string {
 	return sval
 }
 
-func MaskField(obj reflect.Value, i int, typ string, secretKey string, snonce string) string {
+func MaskField(obj reflect.Value, i int, typ string, secretKey string) string {
 	f := obj.Field(i)
 	if reflect.TypeOf(f.Interface()).Kind() == reflect.String {
 		sval := f.Interface().(string)
@@ -80,10 +80,9 @@ func asterixString(sum int) string {
 }
 
 // MaskAESGCM for mask struct use AES-128-GCM
-func MaskAESGCM(msg interface{}, secretKey string, nonce string) {
+func MaskAESGCM(msg interface{}, secretKey string) {
 	gcmObj := gcm{
 		secretKey: secretKey,
-		nonce:     nonce,
 	}
 
 	rv := reflect.ValueOf(msg)
@@ -136,7 +135,7 @@ func changeStruct(rv reflect.Value, typ string, gcmObj gcm) {
 		field := rv.Field(i)
 		switch field.Kind() {
 		case reflect.String:
-			field.SetString(MaskField(rv, i, typ, gcmObj.secretKey, gcmObj.nonce))
+			field.SetString(MaskField(rv, i, typ, gcmObj.secretKey))
 		case reflect.Struct, reflect.Ptr, reflect.Interface:
 			changerv(field, typ, gcmObj)
 		default:
