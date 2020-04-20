@@ -44,8 +44,8 @@ func TestMaskAESGCM(t *testing.T) {
 	empName := emp.Name
 	empPhone := emp.Phonenumber
 
-	sk := "6368616e676520746869732070617373776f726420746f206120736563726574"
-	snonce := "64a9433eae7ccceee2fc0eda"
+	sk := "TESTyfsdlfjlfdsoOIUIJJDSAOJ90naf"
+	snonce := ""
 
 	MaskAESGCM(&emp, sk, snonce)
 
@@ -98,8 +98,8 @@ func TestMaskFieldAESGCM(t *testing.T) {
 		Phonenumber: "123456789",
 	}
 
-	sk := "6368616e676520746869732070617373776f726420746f206120736563726574"
-	snonce := "64a9433eae7ccceee2fc0eda"
+	sk := "TESTyfsdlfjlfdsoOIUIJJDSAOJ90naf"
+	snonce := ""
 
 	object1 := reflect.ValueOf(emp)
 	got := MaskField(object1, 0, AESGCM, sk, snonce)
@@ -116,9 +116,9 @@ func TestMaskFieldAESGCM(t *testing.T) {
 }
 
 func decrypt(encText string) string {
-	key, _ := hex.DecodeString("6368616e676520746869732070617373776f726420746f206120736563726574")
+	key := []byte("TESTyfsdlfjlfdsoOIUIJJDSAOJ90naf")
 	ciphertext, _ := hex.DecodeString(encText)
-	
+
 	block, err := aes.NewCipher(key)
 	if err != nil {
 		panic(err.Error())
@@ -134,7 +134,7 @@ func decrypt(encText string) string {
 		return ""
 	}
 	nonce, ciphertext := ciphertext[:nonceSize], ciphertext[nonceSize:]
-	
+
 	plaintext, err := aesgcm.Open(nil, nonce, ciphertext, nil)
 	if err != nil {
 		panic(err.Error())
