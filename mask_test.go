@@ -45,9 +45,8 @@ func TestMaskAESGCM(t *testing.T) {
 	empPhone := emp.Phonenumber
 
 	sk := "TESTyfsdlfjlfdsoOIUIJJDSAOJ90naf"
-	snonce := ""
 
-	MaskAESGCM(&emp, sk, snonce)
+	MaskAESGCM(&emp, sk)
 
 	if empName != decrypt(emp.Name) {
 		t.Errorf("Expected: %v, n got: %v n", empName, decrypt(emp.Name))
@@ -79,13 +78,13 @@ func TestMaskField(t *testing.T) {
 	empPhone := "1234*****"
 
 	object1 := reflect.ValueOf(emp)
-	got := MaskField(object1, 0, "", "", "")
+	got := MaskField(object1, 0, "", "")
 
 	if got != empName {
 		t.Errorf("Expected: %v , got: %v", empName, got)
 	}
 
-	got = MaskField(object1, 1, "", "", "")
+	got = MaskField(object1, 1, "", "")
 	if got != empPhone {
 		t.Errorf("Expected: %v , got: %v", empPhone, got)
 	}
@@ -99,16 +98,15 @@ func TestMaskFieldAESGCM(t *testing.T) {
 	}
 
 	sk := "TESTyfsdlfjlfdsoOIUIJJDSAOJ90naf"
-	snonce := ""
 
 	object1 := reflect.ValueOf(emp)
-	got := MaskField(object1, 0, AESGCM, sk, snonce)
+	got := MaskField(object1, 0, AESGCM, sk)
 
 	if emp.Name != decrypt(got) {
 		t.Errorf("Expected: %v, got: %v", emp.Name, decrypt(got))
 	}
 
-	got = MaskField(object1, 1, AESGCM, sk, snonce)
+	got = MaskField(object1, 1, AESGCM, sk)
 	if emp.Phonenumber != decrypt(got) {
 		t.Errorf("Expected: %v, got: %v", emp.Phonenumber, got)
 	}
