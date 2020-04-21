@@ -4,7 +4,6 @@ import (
 	"crypto/aes"
 	"crypto/cipher"
 	"encoding/hex"
-	"fmt"
 	"reflect"
 	"testing"
 )
@@ -114,29 +113,26 @@ func TestMaskFieldAESGCM(t *testing.T) {
 }
 
 func decrypt(encText string) string {
-	key := []byte("TESTyfsdlfjlfdsoOIUIJJDSAOJ90naf")
-	ciphertext, _ := hex.DecodeString(encText)
-
-	block, err := aes.NewCipher(key)
+	ct, _ := hex.DecodeString(encText)
+	byteText := ct
+	c, err := aes.NewCipher([]byte("TESTyfsdlfjlfdsoOIUIJJDSAOJ90naf"))
 	if err != nil {
 		panic(err.Error())
 	}
 
-	aesgcm, err := cipher.NewGCM(block)
+	gcm, err := cipher.NewGCM(c)
 	if err != nil {
 		panic(err.Error())
 	}
 
-	nonceSize := aesgcm.NonceSize()
-	if len(ciphertext) < nonceSize {
+	nonceSize := gcm.NonceSize()
+	if len(byteText) < nonceSize {
 		return ""
 	}
-	nonce, ciphertext := ciphertext[:nonceSize], ciphertext[nonceSize:]
-
-	plaintext, err := aesgcm.Open(nil, nonce, ciphertext, nil)
+	nonce, byteText := byteText[:nonceSize], byteText[nonceSize:]
+	s, err := gcm.Open(nil, nonce, byteText, nil)
 	if err != nil {
 		panic(err.Error())
 	}
-
-	return fmt.Sprintf("%s", plaintext)
+	return string(s[:])
 }
