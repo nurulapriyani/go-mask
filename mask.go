@@ -5,8 +5,9 @@ package mask
 import (
 	"crypto/aes"
 	"crypto/cipher"
-	"encoding/hex"
+	"crypto/rand"
 	"fmt"
+	"io"
 	"math"
 	"reflect"
 	"strings"
@@ -30,27 +31,29 @@ func MaskString(sval string) string {
 	return sval
 }
 
-func MaskField(obj reflect.Value, i int, typ string, secretKey string, snonce string) string {
+func MaskField(obj reflect.Value, i int, typ string, secretKey string) string {
 	f := obj.Field(i)
 	if reflect.TypeOf(f.Interface()).Kind() == reflect.String {
 		sval := f.Interface().(string)
 		if strings.ToLower(obj.Type().Field(i).Tag.Get("mask")) == "true" && len(sval) > 0 && typ == AESGCM {
-			key, _ := hex.DecodeString(secretKey)
 			plaintext := []byte(sval)
 
-			block, err := aes.NewCipher(key)
+			block, err := aes.NewCipher([]byte(secretKey))
 			if err != nil {
 				panic(err.Error())
 			}
-
-			nonce, _ := hex.DecodeString(snonce)
 
 			aesgcm, err := cipher.NewGCM(block)
 			if err != nil {
 				panic(err.Error())
 			}
 
-			ciphertext := aesgcm.Seal(nil, nonce, plaintext, nil)
+			nonce := make([]byte, aesgcm.NonceSize())
+			if _, err = io.ReadFull(rand.Reader, nonce); err != nil {
+				return ""
+			}
+
+			ciphertext := aesgcm.Seal(nonce, nonce, plaintext, nil)
 			sval = fmt.Sprintf("%x", ciphertext)
 		} else if strings.ToLower(obj.Type().Field(i).Tag.Get("mask")) == "true" && len(sval) > 0 {
 			sval = doMaskValue(sval)
@@ -77,10 +80,9 @@ func asterixString(sum int) string {
 }
 
 // MaskAESGCM for mask struct use AES-128-GCM
-func MaskAESGCM(msg interface{}, secretKey string, nonce string) {
+func MaskAESGCM(msg interface{}, secretKey string) {
 	gcmObj := gcm{
 		secretKey: secretKey,
-		nonce:     nonce,
 	}
 
 	rv := reflect.ValueOf(msg)
@@ -133,7 +135,7 @@ func changeStruct(rv reflect.Value, typ string, gcmObj gcm) {
 		field := rv.Field(i)
 		switch field.Kind() {
 		case reflect.String:
-			field.SetString(MaskField(rv, i, typ, gcmObj.secretKey, gcmObj.nonce))
+			field.SetString(MaskField(rv, i, typ, gcmObj.secretKey))
 		case reflect.Struct, reflect.Ptr, reflect.Interface:
 			changerv(field, typ, gcmObj)
 		default:

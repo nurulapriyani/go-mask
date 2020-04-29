@@ -4,7 +4,6 @@ import (
 	"crypto/aes"
 	"crypto/cipher"
 	"encoding/hex"
-	"fmt"
 	"reflect"
 	"testing"
 )
@@ -44,10 +43,9 @@ func TestMaskAESGCM(t *testing.T) {
 	empName := emp.Name
 	empPhone := emp.Phonenumber
 
-	sk := "6368616e676520746869732070617373776f726420746f206120736563726574"
-	snonce := "64a9433eae7ccceee2fc0eda"
+	sk := "TESTyfsdlfjlfdsoOIUIJJDSAOJ90naf"
 
-	MaskAESGCM(&emp, sk, snonce)
+	MaskAESGCM(&emp, sk)
 
 	if empName != decrypt(emp.Name) {
 		t.Errorf("Expected: %v, n got: %v n", empName, decrypt(emp.Name))
@@ -79,13 +77,13 @@ func TestMaskField(t *testing.T) {
 	empPhone := "1234*****"
 
 	object1 := reflect.ValueOf(emp)
-	got := MaskField(object1, 0, "", "", "")
+	got := MaskField(object1, 0, "", "")
 
 	if got != empName {
 		t.Errorf("Expected: %v , got: %v", empName, got)
 	}
 
-	got = MaskField(object1, 1, "", "", "")
+	got = MaskField(object1, 1, "", "")
 	if got != empPhone {
 		t.Errorf("Expected: %v , got: %v", empPhone, got)
 	}
@@ -98,17 +96,16 @@ func TestMaskFieldAESGCM(t *testing.T) {
 		Phonenumber: "123456789",
 	}
 
-	sk := "6368616e676520746869732070617373776f726420746f206120736563726574"
-	snonce := "64a9433eae7ccceee2fc0eda"
+	sk := "TESTyfsdlfjlfdsoOIUIJJDSAOJ90naf"
 
 	object1 := reflect.ValueOf(emp)
-	got := MaskField(object1, 0, AESGCM, sk, snonce)
+	got := MaskField(object1, 0, AESGCM, sk)
 
 	if emp.Name != decrypt(got) {
 		t.Errorf("Expected: %v, got: %v", emp.Name, decrypt(got))
 	}
 
-	got = MaskField(object1, 1, AESGCM, sk, snonce)
+	got = MaskField(object1, 1, AESGCM, sk)
 	if emp.Phonenumber != decrypt(got) {
 		t.Errorf("Expected: %v, got: %v", emp.Phonenumber, got)
 	}
@@ -116,24 +113,26 @@ func TestMaskFieldAESGCM(t *testing.T) {
 }
 
 func decrypt(encText string) string {
-	key, _ := hex.DecodeString("6368616e676520746869732070617373776f726420746f206120736563726574")
-	ciphertext, _ := hex.DecodeString(encText)
-	nonce, _ := hex.DecodeString("64a9433eae7ccceee2fc0eda")
-
-	block, err := aes.NewCipher(key)
+	ct, _ := hex.DecodeString(encText)
+	byteText := ct
+	c, err := aes.NewCipher([]byte("TESTyfsdlfjlfdsoOIUIJJDSAOJ90naf"))
 	if err != nil {
 		panic(err.Error())
 	}
 
-	aesgcm, err := cipher.NewGCM(block)
+	gcm, err := cipher.NewGCM(c)
 	if err != nil {
 		panic(err.Error())
 	}
 
-	plaintext, err := aesgcm.Open(nil, nonce, ciphertext, nil)
+	nonceSize := gcm.NonceSize()
+	if len(byteText) < nonceSize {
+		return ""
+	}
+	nonce, byteText := byteText[:nonceSize], byteText[nonceSize:]
+	s, err := gcm.Open(nil, nonce, byteText, nil)
 	if err != nil {
 		panic(err.Error())
 	}
-
-	return fmt.Sprintf("%s", plaintext)
+	return string(s[:])
 }
