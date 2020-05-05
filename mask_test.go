@@ -19,8 +19,8 @@ func TestMask(t *testing.T) {
 		Phonenumber: "123456789",
 	}
 
-	empName := "test*****"
-	empPhone := "1234*****"
+	empName := "t*** t***"
+	empPhone := "123******"
 
 	Mask(&emp)
 
@@ -60,7 +60,7 @@ func TestMaskAESGCM(t *testing.T) {
 func TestMaskString(t *testing.T) {
 	value := "test1234"
 
-	expected := "test****"
+	expected := "tes*****"
 	got := MaskString(value)
 	if got != expected {
 		t.Errorf("Expected: %v , got: %v", expected, got)
@@ -73,8 +73,8 @@ func TestMaskField(t *testing.T) {
 		Phonenumber: "123456789",
 	}
 
-	empName := "test*****"
-	empPhone := "1234*****"
+	empName := "t*** t***"
+	empPhone := "123******"
 
 	object1 := reflect.ValueOf(emp)
 	got := MaskField(object1, 0, "", "")

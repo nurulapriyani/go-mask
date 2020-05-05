@@ -66,9 +66,21 @@ func MaskField(obj reflect.Value, i int, typ string, secretKey string) string {
 }
 
 func doMaskValue(val string) string {
-	halfMask := float64(len(val)) / float64(2)
-	val = (val)[:int(math.Floor(halfMask))] + asterixString(int(math.Ceil(halfMask)))
-	return val
+	words := strings.Fields(val)
+	lenWords := len(words)
+	
+	result := ""
+	if lenWords == 1 {
+		lenVal := len(val)
+		halfMask := int(math.Ceil(float64(lenVal) / float64(3)))
+		result = (val)[:halfMask] + asterixString(lenVal - halfMask)
+	} else {
+		for _, elem := range words {
+			result += elem[:1] + asterixString(len(elem) - 1) + " "
+		}
+		result = result[:len(result)-1]
+	}
+	return result
 }
 
 func asterixString(sum int) string {
