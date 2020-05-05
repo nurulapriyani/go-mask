@@ -136,7 +136,7 @@ func changeStruct(rv reflect.Value, typ string, gcmObj gcm) {
 		switch field.Kind() {
 		case reflect.String:
 			field.SetString(MaskField(rv, i, typ, gcmObj.secretKey))
-		case reflect.Struct, reflect.Ptr, reflect.Interface:
+		case reflect.Struct, reflect.Ptr, reflect.Slice, reflect.Interface, reflect.Map:
 			changerv(field, typ, gcmObj)
 		default:
 			continue
