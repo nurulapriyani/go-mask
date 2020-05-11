@@ -68,15 +68,15 @@ func MaskField(obj reflect.Value, i int, typ string, secretKey string) string {
 func doMaskValue(val string) string {
 	words := strings.Fields(val)
 	lenWords := len(words)
-	
+
 	result := ""
 	if lenWords == 1 {
 		lenVal := len(val)
 		halfMask := int(math.Ceil(float64(lenVal) / float64(3)))
-		result = (val)[:halfMask] + asterixString(lenVal - halfMask)
+		result = (val)[:halfMask] + asterixString(lenVal-halfMask)
 	} else {
 		for _, elem := range words {
-			result += elem[:1] + asterixString(len(elem) - 1) + " "
+			result += elem[:1] + asterixString(len(elem)-1) + " "
 		}
 		result = result[:len(result)-1]
 	}
@@ -127,15 +127,20 @@ func changerv(rv reflect.Value, typ string, gcmObj gcm) {
 
 func changeMap(rv reflect.Value, typ string, gcmObj gcm) {
 	for _, e := range rv.MapKeys() {
-		val := rv.MapIndex(e).Elem()
-		if !val.IsValid() {
-			return
+
+		val := rv.MapIndex(e)
+		if rv.MapIndex(e).Kind() == reflect.Ptr || rv.MapIndex(e).Kind() == reflect.Interface {
+			val = rv.MapIndex(e).Elem()
+			if !val.IsValid() {
+				return
+			}
+			vp := reflect.New(val.Type())
+			vp.Elem().Set(val)
+			vp.Interface()
+			val = vp
 		}
-		vp := reflect.New(val.Type())
-		vp.Elem().Set(val)
-		vp.Interface()
-		changerv(vp, typ, gcmObj)
-		rv.SetMapIndex(e, vp)
+		changerv(val, typ, gcmObj)
+		rv.SetMapIndex(e, val)
 	}
 }
 
